@@ -1,0 +1,77 @@
+openapi: 3.1.0
+info:
+  title: The Agentic Brain - Unified Payment API
+  version: 1.0.0
+  description: |
+    A modular, production-ready payment gateway integrating:
+    - Paystack (full)
+    - Stripe (full)
+    - Flutterwave (scaffold)
+    - Remita, Access Bank, GTBank, UBA, First Bank, Stanbic, Premium Trust Bank
+    - OPay, NIPSB
+
+servers:
+  - url: http://localhost:3000/api
+
+paths:
+
+  /health:
+    get:
+      summary: Health check
+      description: Returns server status.
+      responses:
+        "200": { description: OK }
+
+  /payments/initiate:
+    post:
+      summary: Initiate one-time payment
+      tags: [Payments]
+      requestBody:
+        description: Payment initiation request
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentInitRequest"
+      responses:
+        "200": { description: Payment initialized }
+
+  /payments/providers:
+    get:
+      summary: List available payment providers
+      tags: [Payments]
+      responses:
+        "200": { description: Provider list returned }
+
+  /customers/create:
+    post:
+      summary: Create customer
+      tags: [Customers]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCustomer"
+        required: true
+      responses:
+        "200": { description: Customer created }
+
+components:
+  schemas:
+    PaymentInitRequest:
+      type: object
+      required: [provider, amount, currency, customerId, reference]
+      properties:
+        provider: { type: string }
+        amount: { type: number }
+        currency: { type: string }
+        customerId: { type: string }
+        reference: { type: string }
+        callbackUrl: { type: string }
+
+    CreateCustomer:
+      type: object
+      required: [email]
+      properties:
+        email: { type: string }
+        name: { type: string }

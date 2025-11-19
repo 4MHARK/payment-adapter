@@ -1,0 +1,131 @@
+// Prisma schema for The Agentic Brain Payment System
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "windows", "debian-openssl-1.1.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customers Customer[]
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  userId    String?
+  email     String
+  name      String?
+  createdAt DateTime @default(now())
+
+  user       User?     @relation(fields: [userId], references: [id])
+  payments   Payment[]
+  methods    PaymentMethod[]
+  invoices   Invoice[]
+  subs       Subscription[]
+}
+
+model PaymentProvider {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  accounts ProviderAccount[]
+}
+
+model ProviderAccount {
+  id          String   @id @default(cuid())
+  providerId  String
+  merchantKey String
+  secretKey   String?
+  publicKey   String?
+  createdAt   DateTime @default(now())
+
+  provider PaymentProvider @relation(fields: [providerId], references: [id])
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  customerId    String
+  providerName  String
+  amount        Int
+  currency      String
+  reference     String   @unique
+  status        String   @default("pending")
+  description   String?
+  createdAt     DateTime @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id])
+  refunds  Refund[]
+}
+
+model Subscription {
+  id           String   @id @default(cuid())
+  customerId   String
+  providerName String
+  planId       String
+  amount       Int
+  currency     String
+  interval     String
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id])
+}
+
+model PaymentMethod {
+  id         String   @id @default(cuid())
+  customerId String
+  provider   String
+  token      String
+  createdAt  DateTime @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id])
+}
+
+model Invoice {
+  id         String   @id @default(cuid())
+  customerId String
+  amount     Int
+  currency   String
+  status     String   @default("pending")
+  createdAt  DateTime @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id])
+}
+
+model Refund {
+  id        String   @id @default(cuid())
+  paymentId String
+  amount    Int
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+
+  payment Payment @relation(fields: [paymentId], references: [id])
+}
+
+model WebhookEvent {
+  id        String   @id @default(cuid())
+  provider  String
+  eventId   String
+  status    String   @default("pending")
+  payload   Json
+  createdAt DateTime @default(now())
+}
+
+model IdempotencyKey {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  response  Json?
+  createdAt DateTime @default(now())
+}

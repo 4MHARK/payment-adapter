@@ -1,0 +1,38 @@
+{
+    "info": {
+      "name": "Agentic Brain Payments",
+      "_postman_id": "payments-collection",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+      {
+        "name": "Health Check",
+        "request": {
+          "method": "GET",
+          "url": "http://localhost:3000/api/health"
+        }
+      },
+      {
+        "name": "Providers",
+        "request": {
+          "method": "GET",
+          "url": "http://localhost:3000/api/payments/providers"
+        }
+      },
+      {
+        "name": "Initiate Payment (Paystack)",
+        "request": {
+          "method": "POST",
+          "header": [
+            { "key": "Content-Type", "value": "application/json" },
+            { "key": "Idempotency-Key", "value": "POSTMAN123" }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"provider\": \"paystack\",\n  \"amount\": 5000,\n  \"currency\": \"NGN\",\n  \"customerId\": \"demo_123\",\n  \"reference\": \"ref_postman\",\n  \"callbackUrl\": \"https://example.com\"\n}"
+          },
+          "url": "http://localhost:3000/api/payments/initiate"
+        }
+      }
+    ]
+  }
